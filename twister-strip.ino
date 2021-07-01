@@ -3,10 +3,6 @@
 
 #include<FastLED.h>
 
-#ifdef __AVR__
-  #include <avr/power.h>
-#endif
-
 // if you're too fast, the pixels don't update?
 // I have heard FastLED can update at 60FPS
 // undefine for no delay
@@ -80,10 +76,6 @@ enum Effect { TWISTER, BUBBLES, STARS, WAVES };
 Effect effect = STARS;
 
 void setup() {
-
-  #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
-    clock_prescale_set(clock_div_1);
-  #endif
   pinMode(DATA_PIN, OUTPUT);
 
   FastLED.setBrightness(MAX_BRIGHTNESS);

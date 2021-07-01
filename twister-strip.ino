@@ -33,7 +33,15 @@ int currentEffectLabel;
   #include <avr/power.h>
 #endif
 
+<<<<<<< HEAD
 >>>>>>> af45abe (early prototype)
+=======
+// if you're too fast, the pixels don't update?
+// I have heard FastLED can update at 60FPS
+// undefine for no delay
+//#define MAX_FPS 120
+
+>>>>>>> c126b02 (added multiple effects, still need dynamic select)
 // esp32 pins: onboard LED 5
 // clean pin with no PWM on boot: 4
 
@@ -276,9 +284,6 @@ int sides = 10;    // twister sides
 int maxLength = (int) round(sin(PI/sides) * NUM_LEDS);
 int prevx = 0;
 
-// if you're too fast, the pixels don't update?
-// I have heard FastLED can update at 60FPS
-int MAX_FPS = 120;
 
 float ROT_SPEED = 0.03;
 
@@ -287,6 +292,9 @@ double amplitude = (double) NUM_LEDS;
 
 long microsPerFrame = (int) (1000000.0/MAX_FPS);
 long endLastFrame;
+enum Effect { TWISTER, BUBBLES, STARS, WAVES };
+
+Effect effect = WAVES;
 
 void setup() {
 
@@ -311,12 +319,16 @@ void loop() {
     strip[i] = CRGB(0, 0, 0);
   }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> c126b02 (added multiple effects, still need dynamic select)
 
   switch(effect) {
     case Effect::TWISTER : twister(); break;
     case Effect::BUBBLES : bubbles(); break;
     case Effect::STARS   : stars(); break;
     case Effect::WAVES   : waves(); break;
+<<<<<<< HEAD
     default: waves(); break;
   }
   
@@ -333,6 +345,9 @@ void loop() {
     //drawLine(prevx, prevx, 15);
     
     prevx = x;
+=======
+    default: stars(); break;
+>>>>>>> c126b02 (added multiple effects, still need dynamic select)
   }
   
 <<<<<<< HEAD
@@ -347,6 +362,7 @@ void loop() {
   FastLED.show();
   FastLED.delay(0); 
 
+<<<<<<< HEAD
 <<<<<<< HEAD
   #if defined(MAX_FPS)
     // wait until time for next frame if we're finished early
@@ -420,6 +436,9 @@ void twister() {
     prevx = x;
   }
 =======
+=======
+  #if defined(MAX_FPS)
+>>>>>>> c126b02 (added multiple effects, still need dynamic select)
   // wait until time for next frame if we're finished early
   long microWait = microsPerFrame - (micros() - endLastFrame);
   if (microWait > 0) {
@@ -428,10 +447,54 @@ void twister() {
 
   endLastFrame = micros();
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 >>>>>>> af45abe (early prototype)
 =======
 >>>>>>> c4e7f9b (tweaked a few things when running on real pov stick)
+=======
+  #endif
+}
+
+void bubbles() {
+  // draw random circles, keep buffer of in-progress circles
+}
+
+void waves() {
+  for(int i=0; i<14; i++) {
+    int x = (int) ((sin(theta * (i+1) / 3) + 1) * NUM_LEDS / 2);
+    if (x < 0 || x >= NUM_LEDS) {
+      strip[i] = colours[i];
+    } else {
+      strip[x] = CRGB(colours[i]);
+    }
+  }
+}
+
+void stars() {
+  // random starfield
+  int numStars = random(1, 3);
+  
+  for (int i=0; i < numStars; i++) {
+    int x = random(0, NUM_LEDS);
+    strip[x] = CRGB(255 - x, 255 - x, 255); // light blue radial gradient
+  }
+}
+
+// classic demoscene effect
+void twister() {
+  double theta2 = theta + ((sin(theta*6)) * 1.4);
+  //amplitude = ((float) NUM_LEDS) - ((millis() / 50) % 20);
+  //int offsetx = NUM_LEDS - ((int) amplitude / 2);
+  for (int side = 0; side < sides; side++) {
+    float t = side * TWO_PI / sides;
+    int x = (int) round(((sin(t + theta2) + 1) / 2) * amplitude);
+    drawLine(prevx + 1, x - 1, side);
+    //drawLine(prevx, prevx, 15);
+    
+    prevx = x;
+  }
+>>>>>>> c126b02 (added multiple effects, still need dynamic select)
 }
 
 /*

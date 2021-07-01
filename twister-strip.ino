@@ -70,11 +70,14 @@ float ROT_SPEED = 0.03;
 double theta = 0.0;
 double amplitude = (double) NUM_LEDS;
 
+#if defined(MAX_FPS)
 long microsPerFrame = (int) (1000000.0/MAX_FPS);
+#endif
+
 long endLastFrame;
 enum Effect { TWISTER, BUBBLES, STARS, WAVES };
 
-Effect effect = WAVES;
+Effect effect = STARS;
 
 void setup() {
 
@@ -112,13 +115,13 @@ void loop() {
   FastLED.delay(0); 
 
   #if defined(MAX_FPS)
-  // wait until time for next frame if we're finished early
-  long microWait = microsPerFrame - (micros() - endLastFrame);
-  if (microWait > 0) {
-    delayMicroseconds(microWait);
-  }
-
-  endLastFrame = micros();
+    // wait until time for next frame if we're finished early
+    long microWait = microsPerFrame - (micros() - endLastFrame);
+    if (microWait > 0) {
+      delayMicroseconds(microWait);
+    }
+  
+    endLastFrame = micros();
   #endif
 }
 

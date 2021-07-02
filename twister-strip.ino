@@ -5,10 +5,14 @@
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 52ee5e1 (wip wifi)
 #include <DNSServer.h>
 #include <ESPUI.h>
 
 #include <WiFi.h>
+<<<<<<< HEAD
 
 // secrets include file
 #include "wifi-password.h"
@@ -23,6 +27,12 @@ const byte DNS_PORT = 53;
 IPAddress apIP(192, 168, 1, 1);
 DNSServer dnsServer;
 int currentEffectLabel;
+=======
+// secrets:
+#include "wifi-password.h"
+
+const char *hostname = "twister";
+>>>>>>> 52ee5e1 (wip wifi)
 
 // if you're too fast, the pixels don't update?
 // I have heard FastLED can update at 60FPS
@@ -304,6 +314,9 @@ Effect effect = STARS;
 
 void setup() {
   pinMode(DATA_PIN, OUTPUT);
+  
+  setupWifi();
+  
 
   FastLED.setBrightness(MAX_BRIGHTNESS);
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(strip, NUM_LEDS);
@@ -311,7 +324,51 @@ void setup() {
   endLastFrame = micros();
 }
 
+<<<<<<< HEAD
 >>>>>>> af45abe (early prototype)
+=======
+void setupWifi() {
+  ESPUI.setVerbosity(Verbosity::VerboseJSON);
+  WiFi.setHostname(hostname);
+  WiFi.begin(SSID, WIFI_PASS);
+  uint8_t timeout = 10;
+
+  // Wait for connection until timeout
+  do {
+    delay(500);
+    timeout--;
+  } while (timeout && WiFi.status() != WL_CONNECTED);
+
+  setupUi();
+  
+  
+}
+
+void setupUi() {
+  ControlColor red = ControlColor::Alizarin;
+  uint16_t select = ESPUI.addControl(
+    ControlType::Select, 
+    "Mode:", 
+    "", 
+    red, 
+    tab1, 
+    &modeSelector);
+  
+  ESPUI.addControl(ControlType::Option, "Twister", "twister", red, select);
+  ESPUI.addControl(ControlType::Option, "Stars", "stars", red, select);
+  ESPUI.addControl(ControlType::Option, "Bubbles", "bubbles", red, select);
+  ESPUI.addControl(ControlType::Option, "Waves", "waves", red, select);
+  ESPUI.begin();
+}
+
+void modeSelector( Control* sender, int value ) {
+  Serial.print("Select: ID: ");
+  Serial.print(sender->id);
+  Serial.print(", Value: ");
+  Serial.println( sender->value );
+}
+
+>>>>>>> 52ee5e1 (wip wifi)
 void loop() {
 
   // for each side, if it's in the front (positive angular difference),

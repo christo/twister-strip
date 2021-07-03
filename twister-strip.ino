@@ -293,12 +293,12 @@ void speedSlider(Control *sender, int type) {
 =======
 >>>>>>> c4e7f9b (tweaked a few things when running on real pov stick)
 CRGBArray<NUM_LEDS> strip;
-int sides = 10;    // twister sides
+int sides = 6;    // twister sides
 int maxLength = (int) round(sin(PI/sides) * NUM_LEDS);
 int prevx = 0;
 
 
-float ROT_SPEED = 0.03;
+float ROT_SPEED = 0.02;
 
 double theta = 0.0;
 double amplitude = (double) NUM_LEDS;
@@ -310,7 +310,7 @@ long microsPerFrame = (int) (1000000.0/MAX_FPS);
 long endLastFrame;
 enum Effect { TWISTER, BUBBLES, STARS, WAVES };
 
-Effect effect = STARS;
+Effect effect = WAVES;
 
 void setup() {
   pinMode(DATA_PIN, OUTPUT);
@@ -523,6 +523,8 @@ void twister() {
     endLastFrame = micros();
 >>>>>>> c8d6342 (cleaned up conditional delay mechanism)
   #endif
+
+  effect = (((int)(millis() / 10000)) % 2) == 0 ? WAVES : TWISTER;
 }
 
 void bubbles() {
@@ -558,7 +560,7 @@ void twister() {
   for (int side = 0; side < sides; side++) {
     float t = side * TWO_PI / sides;
     int x = (int) round(((sin(t + theta2) + 1) / 2) * amplitude);
-    drawLine(prevx + 1, x - 1, side);
+    drawLine(prevx + 2, x - 2, side);
     //drawLine(prevx, prevx, 15);
     
     prevx = x;

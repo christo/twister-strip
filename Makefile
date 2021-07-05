@@ -1,11 +1,11 @@
 
-BOARD_TAG = esp32
+BOARD = esp32
+CHIP = esp32
 ARDUINO_DIR   = /Applications/Arduino.app/Contents/Java
-#ARDUINO_DIR   = $(HOME)/src/christo/Aruino
-ARDMK_DIR = /usr/local
-ARDUINO_SKETCHBOOK = $(HOME)/src/christo/Arduino
-AVR_TOOLS_DIR = /usr
-MONITOR_PORT = /dev/cu.SLAB_USBtoUART
+#ARDUINO_DIR   = $(HOME)/src/christo/Arduino
+UPLOAD_PORT = /dev/cu.SLAB_USBtoUART
+UPLOAD_SPEED = 921600
+SKETCH = twister-strip.ino
 
 
-include /usr/local/opt/arduino-mk/Arduino.mk
+include $(HOME)/src/other/makeEspArduino/makeEspArduino.mk

@@ -32,6 +32,7 @@ int currentEffectLabel;
 #include "wifi-password.h"
 
 const char *hostname = "twister";
+<<<<<<< HEAD
 >>>>>>> 52ee5e1 (wip wifi)
 
 // if you're too fast, the pixels don't update?
@@ -43,6 +44,13 @@ const char *hostname = "twister";
 #ifdef __AVR__
   #include <avr/power.h>
 #endif
+=======
+const char *ssid = "twister";
+const byte DNS_PORT = 53;
+IPAddress apIP(192, 168, 1, 1);
+DNSServer dnsServer;
+int currentEffectLabel;
+>>>>>>> d1e47e9 (improved web controls, added time slider control, added wifi ap)
 
 <<<<<<< HEAD
 >>>>>>> af45abe (early prototype)
@@ -298,7 +306,7 @@ int maxLength = (int) round(sin(PI/sides) * NUM_LEDS);
 int prevx = 0;
 
 
-float ROT_SPEED = 0.02;
+float rotSpeed = 0.02;
 
 double theta = 0.0;
 double amplitude = (double) NUM_LEDS;
@@ -315,8 +323,9 @@ Effect effect = WAVES;
 void setup() {
   pinMode(DATA_PIN, OUTPUT);
   
-  setupWifi();
-  
+  Serial.begin(115200);
+  delay(200);
+  setupWeb();
 
   FastLED.setBrightness(MAX_BRIGHTNESS);
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(strip, NUM_LEDS);
@@ -325,12 +334,17 @@ void setup() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> af45abe (early prototype)
 =======
 void setupWifi() {
   ESPUI.setVerbosity(Verbosity::VerboseJSON);
+=======
+void setupWeb() {
+  //ESPUI.setVerbosity(Verbosity::VerboseJSON);
+>>>>>>> d1e47e9 (improved web controls, added time slider control, added wifi ap)
   WiFi.setHostname(hostname);
-  WiFi.begin(SSID, WIFI_PASS);
+  WiFi.begin(SSID, WIFIPASS);
   uint8_t timeout = 10;
 
   // Wait for connection until timeout
@@ -339,36 +353,98 @@ void setupWifi() {
     timeout--;
   } while (timeout && WiFi.status() != WL_CONNECTED);
 
+  // not connected -> create hotspot
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.print("\n\nCreating hotspot");
+
+    WiFi.mode(WIFI_AP);
+    WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
+    WiFi.softAP(ssid);
+
+    timeout = 10;
+
+    do {
+      delay(500);
+      Serial.print(".");
+      timeout--;
+    } while (timeout);
+  }
+  dnsServer.start( DNS_PORT, "*", apIP );
+  Serial.println( "\n\nWiFi parameters:" );
+  Serial.print( "Mode: " );
+  Serial.println( WiFi.getMode() == WIFI_AP ? "Station" : "Client" );
+  Serial.print( "IP address: " );
+  Serial.println( WiFi.getMode() == WIFI_AP ? WiFi.softAPIP() : WiFi.localIP() );
+  Serial.print("MAC: ");
+  Serial.print(mac[5],HEX);
+  Serial.print(":");
+  Serial.print(mac[4],HEX);
+  Serial.print(":");
+  Serial.print(mac[3],HEX);
+  Serial.print(":");
+  Serial.print(mac[2],HEX);
+  Serial.print(":");
+  Serial.print(mac[1],HEX);
+  Serial.print(":");
+  Serial.println(mac[0],HEX);
   setupUi();
-  
-  
 }
 
 void setupUi() {
-  ControlColor red = ControlColor::Alizarin;
-  uint16_t select = ESPUI.addControl(
-    ControlType::Select, 
-    "Mode:", 
-    "", 
-    red, 
-    tab1, 
-    &modeSelector);
+
+  currentEffectLabel = ESPUI.label("Effect:", ControlColor::Emerald, "loading...");
   
-  ESPUI.addControl(ControlType::Option, "Twister", "twister", red, select);
-  ESPUI.addControl(ControlType::Option, "Stars", "stars", red, select);
-  ESPUI.addControl(ControlType::Option, "Bubbles", "bubbles", red, select);
-  ESPUI.addControl(ControlType::Option, "Waves", "waves", red, select);
-  ESPUI.begin();
+  ControlColor c = ControlColor::Turquoise;
+
+  ESPUI.button("stars", &starsButton, c, "stars");
+  ESPUI.button("twister", &twisterButton, c, "twister");
+  ESPUI.button("waves", &wavesButton, c, "waves");
+  ESPUI.button("bubbles", &bubblesButton, c, "bubbles");
+
+  int sliderId = ESPUI.slider("speed", &speedSlider, ControlColor::Peterriver, 10);
+
+  ESPUI.begin(" twister");
+  ESPUI.sliderContinuous = true;
+  ESPUI.updateControlValue(sliderId, String((int) rotSpeed * 100));
 }
 
-void modeSelector( Control* sender, int value ) {
-  Serial.print("Select: ID: ");
-  Serial.print(sender->id);
-  Serial.print(", Value: ");
-  Serial.println( sender->value );
+void speedSlider(Control *sender, int type) {
+  rotSpeed = (float) constrain(sender->value.toInt(), 1, 10) / 100;
 }
 
+<<<<<<< HEAD
 >>>>>>> 52ee5e1 (wip wifi)
+=======
+void starsButton(Control *sender, int type) {
+  if (type == B_DOWN) {
+    effect = STARS;
+    ESPUI.print(currentEffectLabel, "stars");
+  }
+}
+
+void wavesButton(Control *sender, int type) {
+  if (type == B_DOWN) {
+    effect = WAVES;
+    ESPUI.print(currentEffectLabel, "waves");
+  }
+}
+
+void bubblesButton(Control *sender, int type) {
+  if (type == B_DOWN) {
+    effect = BUBBLES;
+    ESPUI.print(currentEffectLabel, "bubbles");
+  }
+}
+
+void twisterButton(Control *sender, int type) {
+  if (type == B_DOWN) {
+    effect = TWISTER;
+    ESPUI.print(currentEffectLabel, "twister");
+  }
+}
+
+
+>>>>>>> d1e47e9 (improved web controls, added time slider control, added wifi ap)
 void loop() {
 
   // for each side, if it's in the front (positive angular difference),
@@ -387,6 +463,7 @@ void loop() {
     case Effect::BUBBLES : bubbles(); break;
     case Effect::STARS   : stars(); break;
     case Effect::WAVES   : waves(); break;
+<<<<<<< HEAD
 <<<<<<< HEAD
     default: waves(); break;
   }
@@ -417,6 +494,12 @@ void loop() {
 =======
   theta += ROT_SPEED;
 >>>>>>> c4e7f9b (tweaked a few things when running on real pov stick)
+=======
+    default: waves(); break;
+  }
+  
+  theta += rotSpeed;
+>>>>>>> d1e47e9 (improved web controls, added time slider control, added wifi ap)
   
   FastLED.show();
   FastLED.delay(0); 
@@ -524,7 +607,6 @@ void twister() {
 >>>>>>> c8d6342 (cleaned up conditional delay mechanism)
   #endif
 
-  effect = (((int)(millis() / 10000)) % 2) == 0 ? WAVES : TWISTER;
 }
 
 void bubbles() {
@@ -534,11 +616,7 @@ void bubbles() {
 void waves() {
   for(int i=0; i<14; i++) {
     int x = (int) ((sin(theta * (i+1) / 3) + 1) * NUM_LEDS / 2);
-    if (x < 0 || x >= NUM_LEDS) {
-      strip[i] = colours[i];
-    } else {
-      strip[x] = CRGB(colours[i]);
-    }
+    strip[x] = CRGB(colours[i]);
   }
 }
 

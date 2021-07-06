@@ -13,6 +13,7 @@
 
 #include <WiFi.h>
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 // secrets include file
 #include "wifi-password.h"
@@ -29,7 +30,15 @@ DNSServer dnsServer;
 int currentEffectLabel;
 =======
 // secrets:
+=======
+
+// secrets include file
+>>>>>>> 89e795e (bubbles wip)
 #include "wifi-password.h"
+#if !(defined(SSID) && defined(WIFI_PASS))
+  #pragma warning "Wifi credentials undefined"
+#endif
+
 
 const char *hostname = "twister";
 <<<<<<< HEAD
@@ -301,15 +310,21 @@ void speedSlider(Control *sender, int type) {
 =======
 >>>>>>> c4e7f9b (tweaked a few things when running on real pov stick)
 CRGBArray<NUM_LEDS> strip;
+
+// twister globals
 int sides = 6;    // twister sides
 int maxLength = (int) round(sin(PI/sides) * NUM_LEDS);
 int prevx = 0;
 
-
+// bubbles globals
+int camp = random(5, 20);
+int cx = 0;
+int cy = random(camp, NUM_LEDS - camp);
+ 
 float rotSpeed = 0.02;
 
 double theta = 0.0;
-double amplitude = (double) NUM_LEDS;
+double amplitude = (double) NUM_LEDS; // amplitude of global cycles
 
 #if defined(MAX_FPS)
 long microsPerFrame = (int) (1000000.0/MAX_FPS);
@@ -325,11 +340,14 @@ void setup() {
   
   Serial.begin(115200);
   delay(200);
-  setupWeb();
+  
 
   FastLED.setBrightness(MAX_BRIGHTNESS);
   FastLED.addLeds<NEOPIXEL, DATA_PIN>(strip, NUM_LEDS);
   clearNow();
+  
+  setupWeb();
+  
   endLastFrame = micros();
 }
 
@@ -341,14 +359,20 @@ void setupWifi() {
   ESPUI.setVerbosity(Verbosity::VerboseJSON);
 =======
 void setupWeb() {
+<<<<<<< HEAD
   //ESPUI.setVerbosity(Verbosity::VerboseJSON);
 >>>>>>> d1e47e9 (improved web controls, added time slider control, added wifi ap)
+=======
+  
+>>>>>>> 89e795e (bubbles wip)
   WiFi.setHostname(hostname);
   WiFi.begin(SSID, WIFIPASS);
   uint8_t timeout = 10;
 
   // Wait for connection until timeout
   do {
+    drawLine(0, (int)((10-timeout) * NUM_LEDS/10), 1);
+    FastLED.show();
     delay(500);
     timeout--;
   } while (timeout && WiFi.status() != WL_CONNECTED);
@@ -364,18 +388,22 @@ void setupWeb() {
     timeout = 10;
 
     do {
+      drawLine(0, (int)((10-timeout) * NUM_LEDS/10), 0);
+      FastLED.show();
       delay(500);
       Serial.print(".");
       timeout--;
     } while (timeout);
   }
-  dnsServer.start( DNS_PORT, "*", apIP );
-  Serial.println( "\n\nWiFi parameters:" );
-  Serial.print( "Mode: " );
-  Serial.println( WiFi.getMode() == WIFI_AP ? "Station" : "Client" );
-  Serial.print( "IP address: " );
-  Serial.println( WiFi.getMode() == WIFI_AP ? WiFi.softAPIP() : WiFi.localIP() );
+  dnsServer.start(DNS_PORT, "*", apIP);
+  Serial.println( "\n\nWiFi parameters:");
+  Serial.print("Mode: " );
+  Serial.println( WiFi.getMode() == WIFI_AP ? "Station" : "Client");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.getMode() == WIFI_AP ? WiFi.softAPIP() : WiFi.localIP());
   Serial.print("MAC: ");
+  byte mac[6];
+  WiFi.macAddress(mac);
   Serial.print(mac[5],HEX);
   Serial.print(":");
   Serial.print(mac[4],HEX);
@@ -404,7 +432,7 @@ void setupUi() {
   int sliderId = ESPUI.slider("speed", &speedSlider, ControlColor::Peterriver, 10);
 
   ESPUI.begin(" twister");
-  ESPUI.sliderContinuous = true;
+  //ESPUI.sliderContinuous = true;
   ESPUI.updateControlValue(sliderId, String((int) rotSpeed * 100));
 }
 
@@ -412,6 +440,7 @@ void speedSlider(Control *sender, int type) {
   rotSpeed = (float) constrain(sender->value.toInt(), 1, 10) / 100;
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 >>>>>>> 52ee5e1 (wip wifi)
 =======
@@ -445,6 +474,8 @@ void twisterButton(Control *sender, int type) {
 
 
 >>>>>>> d1e47e9 (improved web controls, added time slider control, added wifi ap)
+=======
+>>>>>>> 89e795e (bubbles wip)
 void loop() {
 
   // for each side, if it's in the front (positive angular difference),
@@ -512,6 +543,7 @@ void loop() {
     if (microWait > 0) {
       delayMicroseconds(microWait);
     }
+<<<<<<< HEAD
     endLastFrame = micros();
   #endif
 
@@ -603,14 +635,42 @@ void twister() {
       delayMicroseconds(microWait);
     }
   
+=======
+>>>>>>> 89e795e (bubbles wip)
     endLastFrame = micros();
 >>>>>>> c8d6342 (cleaned up conditional delay mechanism)
   #endif
 
 }
 
+/* draw random circles */
 void bubbles() {
-  // draw random circles, keep buffer of in-progress circles
+  // for round circles we want x (pov sweep) to progress such that the staff
+  // sweeps through the same distance in the middle as the distance between each LED
+  // along its length. 
+  strip[0] = CRGB(255, 0, 0);
+  float x = theta * 200;
+  // if we've finished a bubble, start a new one
+  if (x > cx + camp) {
+    
+    camp = random(5, 20);
+    cx = x + camp;
+    // random circle position that fully fits on the strip
+    cy = random(camp, NUM_LEDS - camp); 
+    Serial.println("started new bubble at " + String(cx) + ", " + String(cy) + "amp: " + String(camp));
+  }
+  // x is now intersecting a circle, calculate the y value(s) along the strip
+  int dx = cx-x;
+  int dy = (int)sqrt(camp*camp - dx*dx);
+  int y = y - dy;
+  if (y > 0 && y < NUM_LEDS) {
+    strip[y] = CRGB(colours[dx%14]);
+  }
+  y = y + dy;
+  if (y > 0 && y < NUM_LEDS) {
+    strip[y] = CRGB(colours[dx%14]);
+  }
+  
 }
 
 void waves() {
@@ -684,6 +744,9 @@ void clearNow() {
   FastLED.show();
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 89e795e (bubbles wip)
 
 
 void starsButton(Control *sender, int type) {
@@ -713,5 +776,8 @@ void twisterButton(Control *sender, int type) {
     ESPUI.print(currentEffectLabel, "twister");
   }
 }
+<<<<<<< HEAD
 =======
 >>>>>>> af45abe (early prototype)
+=======
+>>>>>>> 89e795e (bubbles wip)

@@ -4,6 +4,7 @@
 #include<FastLED.h>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include <DNSServer.h>
 #include <ESPUI.h>
 
@@ -36,6 +37,8 @@ int currentEffectLabel;
 <<<<<<< HEAD
 >>>>>>> af45abe (early prototype)
 =======
+=======
+>>>>>>> ad15a74 (removed avr stuff in preparation for adding lots of esp32 specific stuff)
 // if you're too fast, the pixels don't update?
 // I have heard FastLED can update at 60FPS
 // undefine for no delay
@@ -300,10 +303,6 @@ enum Effect { TWISTER, BUBBLES, STARS, WAVES };
 Effect effect = STARS;
 
 void setup() {
-
-  #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
-    clock_prescale_set(clock_div_1);
-  #endif
   pinMode(DATA_PIN, OUTPUT);
 
   FastLED.setBrightness(MAX_BRIGHTNESS);

@@ -290,11 +290,14 @@ float ROT_SPEED = 0.03;
 double theta = 0.0;
 double amplitude = (double) NUM_LEDS;
 
+#if defined(MAX_FPS)
 long microsPerFrame = (int) (1000000.0/MAX_FPS);
+#endif
+
 long endLastFrame;
 enum Effect { TWISTER, BUBBLES, STARS, WAVES };
 
-Effect effect = WAVES;
+Effect effect = STARS;
 
 void setup() {
 
@@ -438,6 +441,7 @@ void twister() {
 =======
 =======
   #if defined(MAX_FPS)
+<<<<<<< HEAD
 >>>>>>> c126b02 (added multiple effects, still need dynamic select)
   // wait until time for next frame if we're finished early
   long microWait = microsPerFrame - (micros() - endLastFrame);
@@ -453,6 +457,15 @@ void twister() {
 =======
 >>>>>>> c4e7f9b (tweaked a few things when running on real pov stick)
 =======
+=======
+    // wait until time for next frame if we're finished early
+    long microWait = microsPerFrame - (micros() - endLastFrame);
+    if (microWait > 0) {
+      delayMicroseconds(microWait);
+    }
+  
+    endLastFrame = micros();
+>>>>>>> c8d6342 (cleaned up conditional delay mechanism)
   #endif
 }
 

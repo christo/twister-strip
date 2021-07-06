@@ -3,6 +3,7 @@
 
 #include<FastLED.h>
 
+<<<<<<< HEAD
 #include <DNSServer.h>
 #include <ESPUI.h>
 
@@ -27,10 +28,17 @@ int currentEffectLabel;
 // undefine for no delay
 //#define MAX_FPS 120
 
+=======
+#ifdef __AVR__
+  #include <avr/power.h>
+#endif
+
+>>>>>>> af45abe (early prototype)
 // esp32 pins: onboard LED 5
 // clean pin with no PWM on boot: 4
 
 #define DATA_PIN 4
+<<<<<<< HEAD
 #define NUM_LEDS 60
 
 // scaling factor 0-255 for brightness. 
@@ -70,10 +78,36 @@ const uint32_t colours[] = {
   0x6c4800,
   0xffbaf3,
   0xffe1a7,
+=======
+#define STATUS_LED_PIN 2
+#define NUM_LEDS 120
+
+// if you're too fast, the pixels don't update?
+// I have heard FastLED can update at 60FPS
+#define MAX_FPS 2
+
+// palette from pico8
+const uint32_t colours[] = {
+  0xFF004D,
+  0xFFA300,
+  0xFFEC27,
+  0x29ADFF,
+  0x83769C,
+  0x00E436,
+  0xFF77A8,
+  0xFFCCAA,
+  0x1D2B53,
+  0x7E2553,
+  0x008751,
+  0xAB5236,
+  0x5F574F,
+  0xC2C3C7,
+>>>>>>> af45abe (early prototype)
   0x000000,
   0xffffff
 };
 
+<<<<<<< HEAD
 CRGBArray<NUM_LEDS> strip;
 
 // twister globals
@@ -193,6 +227,33 @@ void speedSlider(Control *sender, int type) {
   rotSpeed = (float) constrain(sender->value.toInt(), 1, 10) / 100;
 }
 
+=======
+// globals
+
+CRGBArray<NUM_LEDS> strip;
+int sides = 4;    // twister sides
+int maxLength = (int) round(sin(PI/sides) * NUM_LEDS);
+int prevx = 0;
+
+float theta = 0.0;
+float amplitude = (float) NUM_LEDS;
+
+long microsPerFrame = (int) (1000000.0/MAX_FPS);
+long endLastFrame;
+
+void setup() {
+  #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
+    clock_prescale_set(clock_div_1);
+  #endif
+  // Serial.begin(115200);
+  pinMode(DATA_PIN, OUTPUT);
+
+  FastLED.addLeds<NEOPIXEL, DATA_PIN>(strip, NUM_LEDS);
+  clearNow();
+  endLastFrame = micros();
+}
+
+>>>>>>> af45abe (early prototype)
 void loop() {
 
   // for each side, if it's in the front (positive angular difference),
@@ -201,6 +262,7 @@ void loop() {
   for (int i=0; i<NUM_LEDS; i++) {
     strip[i] = CRGB(0, 0, 0);
   }
+<<<<<<< HEAD
 
   switch(effect) {
     case Effect::TWISTER : twister(); break;
@@ -211,10 +273,30 @@ void loop() {
   }
   
   theta += rotSpeed;
+=======
+  
+  for (int side = 0; side < sides; side++) {
+    float t = side * TWO_PI / sides;
+    int x = (int) round(((sin(t + theta) + 1) / 2) * amplitude);
+    drawLine(prevx, x, side);
+    // Serial.print(side * 20);
+    // Serial.print(",");
+    // Serial.print(prevx);
+    // Serial.print(",");
+    // Serial.print(x);
+    // Serial.println();
+    prevx = x;
+  }
+  
+  
+  theta += 0.01;
+  //theta += sin(theta/5)*0.08;
+>>>>>>> af45abe (early prototype)
   
   FastLED.show();
   FastLED.delay(0); 
 
+<<<<<<< HEAD
   #if defined(MAX_FPS)
     // wait until time for next frame if we're finished early
     long microWait = microsPerFrame - (micros() - endLastFrame);
@@ -286,6 +368,16 @@ void twister() {
     
     prevx = x;
   }
+=======
+  // wait until time for next frame if we're finished early
+  long microWait = microsPerFrame - (micros() - endLastFrame);
+  if (microWait > 0) {
+    delayMicroseconds(microWait);
+  }
+
+  endLastFrame = micros();
+
+>>>>>>> af45abe (early prototype)
 }
 
 /*
@@ -295,11 +387,19 @@ void drawLine(int x1, int x2, int colourIndex) {
   
   int length = x2 - x1;
   if (length > 0) {
+<<<<<<< HEAD
     // TODO make darken value from angle of incidence from lightsource (front on)
     // using Lambert cosine law, maybe move out of this function and just take the color in
     //int darken = (int) map(length, 0, maxLength+1, 128, 254);
 
     CRGB colour = CRGB(colours[colourIndex]);// %= darken;
+=======
+    int darken = (int) map(length, 0, maxLength, 128, 255);
+    // Serial.print(maxLength);
+    // Serial.print(",");
+    // Serial.println(darken);
+    CRGB colour = CRGB(colours[colourIndex]) %= darken;
+>>>>>>> af45abe (early prototype)
     
     for (int i=x1; i<=x2; i++) {
       strip[i] = colour;
@@ -311,6 +411,7 @@ void clearNow() {
   FastLED.clear();
   FastLED.show();
 }
+<<<<<<< HEAD
 
 
 void starsButton(Control *sender, int type) {
@@ -340,3 +441,5 @@ void twisterButton(Control *sender, int type) {
     ESPUI.print(currentEffectLabel, "twister");
   }
 }
+=======
+>>>>>>> af45abe (early prototype)
